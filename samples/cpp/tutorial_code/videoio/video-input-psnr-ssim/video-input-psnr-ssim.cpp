@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
     conv << argv[3] << endl << argv[4];       // put in the strings
     conv >> psnrTriggerValue >> delay;        // take out the numbers
 
-    char c;
     int frameNum = -1;          // Frame counter
 
     VideoCapture captRefrnc(sourceReference), captUndTst(sourceCompareWith);
@@ -126,13 +125,14 @@ int main(int argc, char *argv[])
         imshow(WIN_RF, frameReference);
         imshow(WIN_UT, frameUnderTest);
 
-        c = (char)waitKey(delay);
+        char c = (char)waitKey(delay);
         if (c == 27) break;
     }
 
     return 0;
 }
 
+// ![get-psnr]
 double getPSNR(const Mat& I1, const Mat& I2)
 {
     Mat s1;
@@ -144,8 +144,8 @@ double getPSNR(const Mat& I1, const Mat& I2)
 
     double sse = s.val[0] + s.val[1] + s.val[2]; // sum channels
 
-    if( sse <= 1e-10) // for small values return zero
-        return 0;
+    if( sse <= 1e-10) // For very small values, return 360 to cap PSNR (theoretical value is infinity)
+        return 360.0;
     else
     {
         double mse  = sse / (double)(I1.channels() * I1.total());
@@ -153,6 +153,9 @@ double getPSNR(const Mat& I1, const Mat& I2)
         return psnr;
     }
 }
+// ![get-psnr]
+
+// ![get-mssim]
 
 Scalar getMSSIM( const Mat& i1, const Mat& i2)
 {
@@ -206,3 +209,4 @@ Scalar getMSSIM( const Mat& i1, const Mat& i2)
     Scalar mssim = mean(ssim_map);   // mssim = average of ssim map
     return mssim;
 }
+// ![get-mssim]
